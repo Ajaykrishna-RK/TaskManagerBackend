@@ -1,7 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export interface ITask extends Document {
-  title: string;
+  task: string;
   description?: string;
   priority: "low" | "medium" | "high";
   dueDate?: Date;
@@ -12,8 +12,8 @@ export interface ITask extends Document {
 
 const TaskSchema = new Schema<ITask>(
   {
-    title: { type: String, required: true },
-    description: String,
+    task: { type: String, required: true },
+    description: { type: String },
     priority: {
       type: String,
       enum: ["low", "medium", "high"],

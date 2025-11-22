@@ -5,6 +5,7 @@ import {
   deleteTaskUseCase,
   createTaskUseCase,
   taskTestUseCase,
+  getDashboardStatsUseCase,
 } from "../usecases/taskUseCase";
 import { AuthRequest } from "../../types/express/type";
 
@@ -59,5 +60,23 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
     return res.status(result.status).json(result);
   } catch {
     return res.status(500).json({ success: false });
+  }
+};
+
+export const getDashboardStats = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+
+    const result = await getDashboardStatsUseCase(userId);
+
+    return res.status(result.status).json(result);
+  } catch (error) {
+    console.error("Dashboard Stats Controller Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Failed to fetch dashboard stats",
+    });
   }
 };

@@ -36,6 +36,7 @@ export const createTaskUseCase = async (userId: string, data: any) => {
 };
 
 export const getTasksUseCase = async (userId: string) => {
+
   try {
     const tasks = await Task.find({ owner: userId });
 
@@ -115,6 +116,56 @@ export const deleteTaskUseCase = async (userId: string, taskId: string) => {
       success: false,
       status: 500,
       message: "Failed to delete task",
+    };
+  }
+};
+
+
+
+export const getDashboardStatsUseCase = async (userId: string) => {
+  try {
+    // Fetch all tasks for the user
+    const tasks = await Task.find({ owner: userId });
+
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter((t) => t.status === "done").length;
+
+    // pending = todo + in-progress
+    const pendingTasks = tasks.filter(
+      (t) => t.status === "todo" || t.status === "in-progress"
+    ).length;
+
+    // Optional: status-based breakdown
+    const statusCount = {
+      todo: tasks.filter((t) => t.status === "todo").length,
+      inProgress: tasks.filter((t) => t.status === "in-progress").length,
+      done: completedTasks,
+    };
+
+    // Optional: AI priority breakdown
+    const aiPriorityCount = {
+      low: tasks.filter((t) => t.aiSuggestedPriority === "low").length,
+      medium: tasks.filter((t) => t.aiSuggestedPriority === "medium").length,
+      high: tasks.filter((t) => t.aiSuggestedPriority === "high").length,
+    };
+
+    return {
+      success: true,
+      status: 200,
+      data: {
+        totalTasks,
+        completedTasks,
+        pendingTasks,
+        statusCount,
+        aiPriorityCount,
+      },
+    };
+  } catch (error) {
+    console.error("Dashboard Stats Error:", error);
+    return {
+      success: false,
+      status: 500,
+      message: "Failed to fetch dashboard stats",
     };
   }
 };
