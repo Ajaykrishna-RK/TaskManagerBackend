@@ -1,13 +1,12 @@
 {
   "name": "machinetestbackend",
   "version": "1.0.0",
-  "main": "index.js",
- "scripts": {
-  "dev": "nodemon --watch src --exec ts-node src/index.ts",
-  "build": "tsc",
-"start": "node src/index.ts"
-
-},
+ "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
   "author": "",
   "license": "ISC",
   "description": "",
