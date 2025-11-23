@@ -36,7 +36,6 @@ export const createTaskUseCase = async (userId: string, data: any) => {
 };
 
 export const getTasksUseCase = async (userId: string) => {
-
   try {
     const tasks = await Task.find({ owner: userId });
 
@@ -120,8 +119,6 @@ export const deleteTaskUseCase = async (userId: string, taskId: string) => {
   }
 };
 
-
-
 export const getDashboardStatsUseCase = async (userId: string) => {
   try {
     // Fetch all tasks for the user
@@ -149,6 +146,12 @@ export const getDashboardStatsUseCase = async (userId: string) => {
       high: tasks.filter((t) => t.aiSuggestedPriority === "high").length,
     };
 
+    const priorityCount = {
+      low: tasks.filter((t) => t.priority === "low").length,
+      medium: tasks.filter((t) => t.priority === "medium").length,
+      high: tasks.filter((t) => t.priority === "high").length,
+    };
+
     return {
       success: true,
       status: 200,
@@ -158,6 +161,7 @@ export const getDashboardStatsUseCase = async (userId: string) => {
         pendingTasks,
         statusCount,
         aiPriorityCount,
+        priorityCount
       },
     };
   } catch (error) {
