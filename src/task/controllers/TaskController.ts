@@ -34,10 +34,12 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
 export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
-    const result = await getTasksUseCase(req.userId!);
+    const userId = req.userId!;
+    const result = await getTasksUseCase(userId, req.query);
     return res.status(result.status).json(result);
-  } catch {
-    return res.status(500).json({ success: false });
+  } catch (error) {
+    console.error("Get Tasks Controller Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 

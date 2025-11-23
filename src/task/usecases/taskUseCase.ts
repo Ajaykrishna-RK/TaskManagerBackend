@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import Task from "../../models/taskModel/Task";
+import { suggestPriorityFromText } from "../../services/ai/AiSuggestedPriority";
 
 export const taskTestUseCase = async () => {
   try {
@@ -15,8 +16,14 @@ export const taskTestUseCase = async () => {
 
 export const createTaskUseCase = async (userId: string, data: any) => {
   try {
+    let aiSuggestedPriority = null;
+
+    if (data.task && data.task.trim()) {
+      aiSuggestedPriority = await suggestPriorityFromText(data.task);
+    }
     const newTask = await Task.create({
       ...data,
+      aiSuggestedPriority,
       owner: new Types.ObjectId(userId),
     });
 
@@ -35,14 +42,64 @@ export const createTaskUseCase = async (userId: string, data: any) => {
   }
 };
 
-export const getTasksUseCase = async (userId: string) => {
+export const getTasksUseCase = async (
+  userId: string,
+  query: {
+    status?: string;
+    priority?: string;
+    search?: string;
+    sort?: string;
+    page?: string;
+    limit?: string;
+  }
+) => {
   try {
-    const tasks = await Task.find({ owner: userId });
+    const filter: any = { owner: userId };
+
+    // 🔍 STATUS FILTERING
+    if (query.status) {
+      filter.status = query.status;
+    }
+
+    // 🔍 PRIORITY FILTERING
+    if (query.priority) {
+      filter.priority = query.priority;
+    }
+
+    // 🔍 SEARCH (text match in task title/description)
+    if (query.search) {
+      filter.task = { $regex: query.search, $options: "i" };
+    }
+
+    // 🔄 SORTING
+    let sort: any = { createdAt: -1 }; // default latest first
+
+    if (query.sort) {
+      if (query.sort.startsWith("-")) {
+        sort = { [query.sort.substring(1)]: -1 };
+      } else {
+        sort = { [query.sort]: 1 };
+      }
+    }
+
+    // 📌 PAGINATION (BONUS)
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const tasks = await Task.find(filter).sort(sort).skip(skip).limit(limit);
+
+    const totalCount = await Task.countDocuments(filter);
 
     return {
       success: true,
       status: 200,
       data: tasks,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+      },
     };
   } catch (error) {
     console.error("Get Tasks Error:", error);
