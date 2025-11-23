@@ -121,48 +121,29 @@ export const deleteTaskUseCase = async (userId: string, taskId: string) => {
 
 export const getDashboardStatsUseCase = async (userId: string) => {
   try {
-    // Fetch all tasks for the user
     const tasks = await Task.find({ owner: userId });
 
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter((t) => t.status === "done").length;
+    let inProgress = 0;
+    let completed = 0;
+    let pending = 0;
 
-    // pending = todo + in-progress
-    const pendingTasks = tasks.filter(
-      (t) => t.status === "todo" || t.status === "in-progress"
-    ).length;
+    for (const t of tasks) {
+      if (t.status === "in-progress") inProgress++;
+      else if (t.status === "done") completed++;
+      else if (t.status === "todo") pending++;
+    }
 
-    // Optional: status-based breakdown
-    const statusCount = {
-      todo: tasks.filter((t) => t.status === "todo").length,
-      inProgress: tasks.filter((t) => t.status === "in-progress").length,
-      done: completedTasks,
-    };
-
-    // Optional: AI priority breakdown
-    const aiPriorityCount = {
-      low: tasks.filter((t) => t.aiSuggestedPriority === "low").length,
-      medium: tasks.filter((t) => t.aiSuggestedPriority === "medium").length,
-      high: tasks.filter((t) => t.aiSuggestedPriority === "high").length,
-    };
-
-    const priorityCount = {
-      low: tasks.filter((t) => t.priority === "low").length,
-      medium: tasks.filter((t) => t.priority === "medium").length,
-      high: tasks.filter((t) => t.priority === "high").length,
+    const statusInfo = {
+      totalTasks: tasks.length,
+      inProgress,
+      completedTasks: completed,
+      pendingTasks: pending,
     };
 
     return {
       success: true,
       status: 200,
-      data: {
-        totalTasks,
-        completedTasks,
-        pendingTasks,
-        statusCount,
-        aiPriorityCount,
-        priorityCount
-      },
+      data: statusInfo,
     };
   } catch (error) {
     console.error("Dashboard Stats Error:", error);
