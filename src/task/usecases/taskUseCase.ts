@@ -56,23 +56,19 @@ export const getTasksUseCase = async (
   try {
     const filter: any = { owner: userId };
 
-    // 🔍 STATUS FILTERING
     if (query.status) {
       filter.status = query.status;
     }
 
-    // 🔍 PRIORITY FILTERING
     if (query.priority) {
       filter.priority = query.priority;
     }
 
-    // 🔍 SEARCH (text match in task title/description)
     if (query.search) {
       filter.task = { $regex: query.search, $options: "i" };
     }
 
-    // 🔄 SORTING
-    let sort: any = { createdAt: -1 }; // default latest first
+    let sort: any = { createdAt: -1 };
 
     if (query.sort) {
       if (query.sort.startsWith("-")) {
@@ -82,7 +78,6 @@ export const getTasksUseCase = async (
       }
     }
 
-    // 📌 PAGINATION (BONUS)
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 20;
     const skip = (page - 1) * limit;
