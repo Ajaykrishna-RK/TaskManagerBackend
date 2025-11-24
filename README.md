@@ -44,5 +44,4 @@ Create a `.env` file in backend root:
 - clone this project
 - npm install
 - npm run dev
-## 📁 Folder Structure
 
